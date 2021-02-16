@@ -1,6 +1,5 @@
 FROM debian:bullseye
 
-ARG TARGET_GO_VERSION=1.15.8
 ARG INSTALL_ZSH="false"
 ARG UPGRADE_PACKAGES="true"
 
@@ -13,10 +12,17 @@ RUN bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "$
     && apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/library-scripts
 
 # Install Go tools
+ARG TARGET_GO_VERSION=1.15.8
+ARG TARGET_GO_PATH="/go"
+ARG TARGET_GO_ROOT="/usr/local/go"
+ARG INSTALL_GO_TOOLS="false"
 ENV GO111MODULE=auto
 COPY build-files/go-debian.sh /tmp/library-scripts/
-RUN bash /tmp/library-scripts/go-debian.sh "${TARGET_GO_VERSION}" "/usr/local/go" "/go" "${USERNAME}" "false" \
+RUN bash /tmp/library-scripts/go-debian.sh "${TARGET_GO_VERSION}" "${TARGET_GO_ROOT}" "${TARGET_GO_PATH}" "${USERNAME}" "${INSTALL_GO_TOOLS}" \
     && apt-get clean -y && rm -rf /tmp/library-scripts
+ENV PATH="${TARGET_GO_ROOT}/bin:${TARGET_GO_PATH}/bin:${PATH}"
+ENV GOPATH=${TARGET_GO_PATH}
+ENV GOROOT=${TARGET_GO_ROOT}
 
 # [Option] Install Node.js
 ARG INSTALL_NODE="false"
